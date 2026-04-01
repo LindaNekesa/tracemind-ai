@@ -1,0 +1,115 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/forms";
+
+/* ── Custom properties ── */
+@theme {
+  --color-primary:      #2563eb;
+  --color-primary-dark: #1d4ed8;
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  background-color: #f1f5f9;
+  color: #1e293b;
+  -webkit-font-smoothing: antialiased;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+/* ── Dark mode ── */
+.dark body                { background-color: #0f172a; color: #e2e8f0; }
+.dark .bg-white           { background-color: #1e293b !important; }
+.dark .bg-gray-50         { background-color: #1e293b !important; }
+.dark .bg-gray-100        { background-color: #0f172a !important; }
+.dark .bg-gray-200        { background-color: #334155 !important; }
+.dark .text-gray-800      { color: #f1f5f9 !important; }
+.dark .text-gray-700      { color: #cbd5e1 !important; }
+.dark .text-gray-600      { color: #94a3b8 !important; }
+.dark .text-gray-500      { color: #64748b !important; }
+.dark .text-gray-400      { color: #475569 !important; }
+.dark .border-gray-100    { border-color: #334155 !important; }
+.dark .border-gray-200    { border-color: #334155 !important; }
+.dark .border-gray-300    { border-color: #475569 !important; }
+.dark .shadow-sm          { box-shadow: 0 1px 3px rgba(0,0,0,0.4) !important; }
+.dark .shadow             { box-shadow: 0 2px 8px rgba(0,0,0,0.5) !important; }
+.dark input, .dark textarea, .dark select {
+  background-color: #1e293b !important;
+  color: #f1f5f9 !important;
+  border-color: #475569 !important;
+}
+.dark input::placeholder, .dark textarea::placeholder { color: #64748b !important; }
+.dark table thead         { background-color: #1e293b !important; }
+.dark table tbody tr:hover{ background-color: #334155 !important; }
+.dark .divide-gray-100 > * + * { border-color: #334155 !important; }
+.dark aside.bg-gray-900   { background-color: #020617 !important; }
+
+/* ── Animations ── */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes pulse-slow {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.5; }
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-8px); }
+}
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position:  200% 0; }
+}
+
+.animate-fade-in-up  { animation: fadeInUp 0.6s ease both; }
+.animate-fade-in     { animation: fadeIn   0.4s ease both; }
+.animate-float       { animation: float    3s ease-in-out infinite; }
+.animate-pulse-slow  { animation: pulse-slow 2s ease-in-out infinite; }
+
+.delay-100 { animation-delay: 0.1s; }
+.delay-200 { animation-delay: 0.2s; }
+.delay-300 { animation-delay: 0.3s; }
+.delay-400 { animation-delay: 0.4s; }
+
+/* ── Glass card ── */
+.glass {
+  background: rgba(255,255,255,0.08);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,0.15);
+}
+
+/* ── Gradient text ── */
+.gradient-text {
+  background: linear-gradient(135deg, #60a5fa, #a78bfa, #34d399);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ── Skeleton loader ── */
+.skeleton {
+  background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 50%, #e2e8f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 6px;
+}
+.dark .skeleton {
+  background: linear-gradient(90deg, #1e293b 25%, #334155 50%, #1e293b 75%);
+  background-size: 200% 100%;
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar       { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+.dark ::-webkit-scrollbar-thumb { background: #475569; }

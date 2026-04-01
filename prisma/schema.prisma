@@ -1,0 +1,71 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id         String   @id @default(uuid())
+  email      String   @unique
+  password   String
+  name       String
+  phone      String?
+  avatar     String?
+  role       String   @default("viewer")
+  department String   @default("general")
+  createdAt  DateTime @default(now())
+
+  cases      Case[]
+  messages   AdminMessage[]
+}
+
+model Case {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  status      String
+  priority    String
+  type        String
+  logs        Json
+  aiResult    Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+
+  evidence  Evidence[]
+  analysis  AnalysisResult[]
+}
+
+model Evidence {
+  id        String   @id @default(uuid())
+  filePath  String
+  fileType  String
+  caseId    String
+  createdAt DateTime @default(now())
+
+  case      Case @relation(fields: [caseId], references: [id])
+}
+
+model AnalysisResult {
+  id        String   @id @default(uuid())
+  caseId    String
+  result    Json
+  createdAt DateTime @default(now())
+
+  case      Case @relation(fields: [caseId], references: [id])
+}
+
+model AdminMessage {
+  id        String   @id @default(uuid())
+  userId    String
+  subject   String
+  message   String
+  status    String   @default("unread")
+  createdAt DateTime @default(now())
+
+  user      User @relation(fields: [userId], references: [id])
+}
