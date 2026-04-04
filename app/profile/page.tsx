@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Avatar from "@/components/Avatar";
+import PhoneInput from "@/components/PhoneInput";
 import toast from "react-hot-toast";
 
 interface Profile {
@@ -97,9 +98,7 @@ export default function ProfilePage() {
           <form onSubmit={handleSave} className="mt-6 space-y-4 border-t pt-5">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Phone number</label>
-              <input type="tel" placeholder="+1 234 567 8900" value={form.phone}
-                onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              <PhoneInput value={form.phone} onChange={(v) => setForm((f) => ({ ...f, phone: v }))} />
             </div>
             <button type="submit" disabled={saving}
               className="bg-blue-600 text-white px-6 py-2.5 rounded-lg text-sm font-medium hover:bg-blue-700 transition disabled:opacity-60">

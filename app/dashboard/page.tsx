@@ -69,7 +69,7 @@ export default async function DashboardPage() {
             <Link href="/cases/new" className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition">+ New Case</Link>
           </div>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-4">
+        <div className="grid grid-cols-2 xl:grid-cols-5 gap-4">
           <StatsCard title="Total Cases"    value={stats.total}         icon="📁" color="blue"   sub="All time" />
           <StatsCard title="Open Cases"     value={stats.open}          icon="🔓" color="yellow" sub="Active" />
           <StatsCard title="Closed Cases"   value={stats.closed}        icon="✅" color="green"  sub="Resolved" />

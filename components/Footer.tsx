@@ -8,9 +8,9 @@ export default function Footer() {
           <span className="text-gray-600 text-sm">— Digital Forensics Platform</span>
         </div>
         <div className="flex items-center gap-6 text-sm text-gray-500">
-          <a href="#" className="hover:text-white transition">GitHub</a>
-          <a href="#" className="hover:text-white transition">LinkedIn</a>
-          <a href="#" className="hover:text-white transition">Portfolio</a>
+          <a href="https://github.com/LindaNekesa/erima-portfolio" target="_blank" rel="noopener noreferrer" className="hover:text-white transition">GitHub</a>
+          <a href="https://github.com/LindaNekesa/erima-portfolio" target="_blank" rel="noopener noreferrer" className="hover:text-white transition">Portfolio</a>
+          <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className="hover:text-white transition">LinkedIn</a>
         </div>
         <div className="text-sm text-gray-600 text-center">
           <span>Designed by </span>

@@ -5,13 +5,6 @@ import { useEffect, useState } from "react";
 import ContactAdmin from "./ContactAdmin";
 import Avatar from "./Avatar";
 
-const links = [
-  { href: "/dashboard",       label: "Dashboard", icon: "▣" },
-  { href: "/cases",           label: "Cases",      icon: "⬡" },
-  { href: "/evidence/upload", label: "Evidence",   icon: "◈" },
-  { href: "/reports",         label: "Reports",    icon: "◧" },
-];
-
 interface Me { name: string; role: string; email: string; avatar?: string | null; }
 
 const roleLabel: Record<string, string> = {
@@ -27,6 +20,14 @@ export default function Sidebar() {
   const [isAdmin, setIsAdmin]     = useState(false);
   const [showContact, setShowContact] = useState(false);
   const [me, setMe]               = useState<Me | null>(null);
+
+  const links = [
+    { href: "/dashboard",       label: "Dashboard", icon: "▣" },
+    { href: "/cases",           label: "Cases",      icon: "⬡" },
+    { href: "/evidence/upload", label: "Evidence",   icon: "◈" },
+    { href: "/reports",         label: "Reports",    icon: "◧" },
+    ...(me?.role === "trainee" ? [{ href: "/learn", label: "Learning", icon: "🎓" }] : []),
+  ];
 
   useEffect(() => {
     fetch("/api/auth/me")
@@ -53,7 +54,7 @@ export default function Sidebar() {
         </div>
 
         {/* User card */}
-        {me && (
+        {me && me.name && (
           <Link href="/profile"
             className="flex items-center gap-3 px-4 py-3.5 border-b border-white/5 hover:bg-white/3 transition group">
             <Avatar src={me.avatar} name={me.name} size="sm" />
@@ -70,8 +71,7 @@ export default function Sidebar() {
         {/* Nav */}
         <nav className="flex-1 px-3 py-4 space-y-0.5">
           <p className="text-xs font-semibold text-gray-600 uppercase tracking-widest px-3 mb-3">Navigation</p>
-          {links.map((l) => (
-            <Link key={l.label} href={l.href}
+          {links.map((l) => (            <Link key={l.label} href={l.href}
               className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition text-sm font-medium ${
                 isActive(l.href)
                   ? "bg-blue-600/15 text-blue-400 border border-blue-500/20"
@@ -104,6 +104,14 @@ export default function Sidebar() {
 
         {/* Bottom actions */}
         <div className="px-3 py-4 border-t border-white/5 space-y-0.5">
+          <Link href="/settings"
+            className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition text-sm font-medium ${
+              pathname === "/settings"
+                ? "bg-blue-600/15 text-blue-400 border border-blue-500/20"
+                : "text-gray-400 hover:text-white hover:bg-white/5"
+            }`}>
+            <span className="text-base w-5 text-center">⚙</span> Settings
+          </Link>
           <Link href="/profile"
             className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-400 hover:text-white hover:bg-white/5 transition text-sm">
             <span className="text-base w-5 text-center">◉</span> My Profile

@@ -1,12 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import toast from "react-hot-toast";
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const verified = searchParams.get("verified");
   const [email, setEmail]               = useState("");
   const [password, setPassword]         = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -15,6 +17,10 @@ export default function LoginPage() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (password.length < 8) {
+      setError("Password must be at least 8 characters");
+      return;
+    }
     setLoading(true);
     setError("");
     try {
@@ -90,6 +96,18 @@ export default function LoginPage() {
             <p className="text-gray-500 text-sm">Sign in to your account to continue.</p>
           </div>
 
+          {/* Verified banner */}
+          {verified === "true" && (
+            <div className="mb-6 flex items-start gap-3 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-4 py-3 rounded-xl text-sm">
+              ✅ Email verified! You can now sign in.
+            </div>
+          )}
+          {verified === "error" && (
+            <div className="mb-6 flex items-start gap-3 bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-xl text-sm">
+              ❌ Email verification failed. Please try again.
+            </div>
+          )}
+
           {/* Error banner */}
           {error && (
             <div className="mb-6 flex items-start gap-3 bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-xl text-sm">
@@ -125,10 +143,10 @@ export default function LoginPage() {
               </div>
               <div className="relative">
                 <input
-                  type={showPassword ? "text" : "password"} placeholder="••••••••" value={password}
+                  type={showPassword ? "text" : "password"} placeholder="Min. 8 characters" value={password}
                   onChange={(e) => { setPassword(e.target.value); setError(""); }}
                   className="w-full px-4 py-3.5 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-600 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition pr-12"
-                  required autoComplete="current-password"
+                  required autoComplete="current-password" minLength={8}
                 />
                 <button
                   type="button"

@@ -16,10 +16,10 @@ const deptLabel: Record<string, string> = {
 };
 
 const LEARNING_MODULES = [
-  { icon: "📁", title: "Create Your First Case",    desc: "Learn how to open and document a forensic case.",   href: "/cases/new",       done: false },
-  { icon: "🗂️", title: "Upload Evidence",           desc: "Practice uploading and tagging digital evidence.",   href: "/evidence/upload", done: false },
-  { icon: "🤖", title: "Run AI Analysis",           desc: "Use the AI engine to analyse log data.",             href: "/cases",           done: false },
-  { icon: "📄", title: "Review a Report",           desc: "Read through a completed investigation report.",     href: "/reports",         done: false },
+  { icon: "📁", title: "Create Your First Case",    desc: "Learn how to open and document a forensic case.",   href: "/cases/new",       },
+  { icon: "🗂️", title: "Upload Evidence",           desc: "Practice uploading and tagging digital evidence.",   href: "/evidence/upload", },
+  { icon: "🤖", title: "Run AI Analysis",           desc: "Use the AI engine to analyse log data.",             href: "/cases",           },
+  { icon: "🎓", title: "Learning Center",           desc: "Study digital forensics with guided lessons & quizzes.", href: "/learn",       },
 ];
 
 export default function TraineeDashboard({ stats }: Props) {
@@ -63,7 +63,10 @@ export default function TraineeDashboard({ stats }: Props) {
 
       {/* Learning modules */}
       <div className="bg-white rounded-xl p-5 shadow-sm">
-        <h2 className="font-semibold text-gray-700 mb-4">Learning Modules</h2>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="font-semibold text-gray-700">Learning Modules</h2>
+          <a href="/learn" className="text-xs text-blue-600 font-semibold hover:underline">Open Learning Center →</a>
+        </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {LEARNING_MODULES.map((m) => (
             <Link key={m.title} href={m.href}

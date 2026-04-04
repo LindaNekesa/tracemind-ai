@@ -23,20 +23,33 @@ export default function CasesPage() {
   const [error, setError]   = useState("");
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("ALL");
+  const [page, setPage]     = useState(1);
+  const [total, setTotal]   = useState(0);
+  const LIMIT = 20;
 
-  useEffect(() => {
-    fetch("/api/cases")
-      .then((r) => { if (!r.ok) throw new Error("Failed to load"); return r.json(); })
-      .then((d) => { if (Array.isArray(d)) setCases(d); else throw new Error(d.error); })
+  const load = (q: string, s: string, p: number) => {
+    setLoading(true);
+    const params = new URLSearchParams({ q, status: s, page: String(p), limit: String(LIMIT) });
+    fetch(`/api/cases?${params}`)
+      .then((r) => { if (!r.ok) throw new Error("Failed"); return r.json(); })
+      .then((d) => { setCases(d.cases ?? []); setTotal(d.total ?? 0); })
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false));
-  }, []);
+  };
 
-  const filtered = cases.filter((c) => {
-    const matchSearch = c.title.toLowerCase().includes(search.toLowerCase()) || c.type.toLowerCase().includes(search.toLowerCase());
-    const matchStatus = statusFilter === "ALL" || c.status === statusFilter;
-    return matchSearch && matchStatus;
-  });
+  useEffect(() => { load(search, statusFilter, page); }, []);
+
+  const handleSearch = (q: string) => { setSearch(q); setPage(1); load(q, statusFilter, 1); };
+  const handleStatus = (s: string) => { setStatusFilter(s); setPage(1); load(search, s, 1); };
+
+  const deleteCase = async (id: string, title: string) => {
+    if (!confirm(`Delete "${title}"? This cannot be undone.`)) return;
+    await fetch(`/api/cases/${id}`, { method: "DELETE" });
+    setCases((p) => p.filter((c) => c.id !== id));
+    setTotal((t) => t - 1);
+  };
+
+  const pages = Math.ceil(total / LIMIT);
 
   return (
     <div className="space-y-5 animate-fade-in">
@@ -59,12 +72,12 @@ export default function CasesPage() {
           <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
-          <input type="text" placeholder="Search cases..." value={search} onChange={(e) => setSearch(e.target.value)}
+          <input type="text" placeholder="Search cases..." value={search} onChange={(e) => handleSearch(e.target.value)}
             className="w-full pl-9 pr-4 py-2.5 border border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800 dark:text-white placeholder-gray-400" />
         </div>
         <div className="flex gap-2">
           {["ALL", "OPEN", "IN_PROGRESS", "CLOSED"].map((s) => (
-            <button key={s} onClick={() => setStatusFilter(s)}
+            <button key={s} onClick={() => handleStatus(s)}
               className={`px-3 py-2 rounded-xl text-xs font-semibold transition ${statusFilter === s ? "bg-blue-600 text-white shadow-md shadow-blue-600/25" : "bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/10"}`}>
               {s === "ALL" ? "All" : s === "IN_PROGRESS" ? "In Progress" : s.charAt(0) + s.slice(1).toLowerCase()}
             </button>
@@ -79,8 +92,7 @@ export default function CasesPage() {
             <div key={i} className="skeleton h-14 rounded-xl" />
           ))}
         </div>
-      ) : error ? (
-        <div className="bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-2xl p-8 text-center">
+      ) : error ? (        <div className="bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-2xl p-8 text-center">
           <p className="text-2xl mb-2">⚠️</p>
           <p className="text-red-600 dark:text-red-400 font-medium mb-3">{error}</p>
           <button onClick={() => window.location.reload()}
@@ -88,7 +100,7 @@ export default function CasesPage() {
             Retry
           </button>
         </div>
-      ) : filtered.length === 0 ? (
+      ) : cases.length === 0 ? (
         <div className="bg-white dark:bg-white/3 border border-gray-100 dark:border-white/5 rounded-2xl p-16 text-center">
           <div className="text-5xl mb-4">📁</div>
           <h3 className="font-semibold text-gray-700 dark:text-gray-300 mb-2">
@@ -117,7 +129,7 @@ export default function CasesPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50 dark:divide-white/5">
-              {filtered.map((c) => {
+              {cases.map((c) => {
                 const sc = statusConfig[c.status];
                 const pc = priorityConfig[c.priority];
                 return (
@@ -139,19 +151,34 @@ export default function CasesPage() {
                     </td>
                     <td className="px-5 py-4 text-gray-400 dark:text-gray-500 text-xs">{new Date(c.createdAt).toLocaleDateString()}</td>
                     <td className="px-5 py-4">
-                      <Link href={`/cases/${c.id}`}
-                        className="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition opacity-0 group-hover:opacity-100">
-                        View
-                        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
-                      </Link>
+                      <div className="flex items-center gap-3 opacity-0 group-hover:opacity-100 transition">
+                        <Link href={`/cases/${c.id}`}
+                          className="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 transition">
+                          View
+                          <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+                        </Link>
+                        <button onClick={() => deleteCase(c.id, c.title)}
+                          className="text-xs text-red-500 hover:text-red-700 transition font-medium">
+                          Delete
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 );
               })}
             </tbody>
           </table>
-          <div className="px-5 py-3 border-t border-gray-50 dark:border-white/5 text-xs text-gray-400">
-            Showing {filtered.length} of {cases.length} cases
+          <div className="px-5 py-3 border-t border-gray-50 dark:border-white/5 flex items-center justify-between text-xs text-gray-400">
+            <span>Showing {cases.length} of {total} cases</span>
+            {pages > 1 && (
+              <div className="flex gap-1">
+                <button onClick={() => { setPage(page - 1); load(search, statusFilter, page - 1); }} disabled={page === 1}
+                  className="px-3 py-1 rounded-lg border border-gray-200 dark:border-white/10 disabled:opacity-40 hover:bg-gray-50 dark:hover:bg-white/5 transition">←</button>
+                <span className="px-3 py-1">{page} / {pages}</span>
+                <button onClick={() => { setPage(page + 1); load(search, statusFilter, page + 1); }} disabled={page === pages}
+                  className="px-3 py-1 rounded-lg border border-gray-200 dark:border-white/10 disabled:opacity-40 hover:bg-gray-50 dark:hover:bg-white/5 transition">→</button>
+              </div>
+            )}
           </div>
         </div>
       )}

@@ -12,15 +12,14 @@ async function getUser(req: NextRequest) {
   } catch { return null; }
 }
 
-// GET — fetch unread notification count + recent notifications
 export async function GET(req: NextRequest) {
   const user = await getUser(req);
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   try {
     if (user.role === "admin") {
-      // Admins see unread messages from users
-      const [unread, recent] = await Promise.all([
+      // Admins: unread AdminMessages + their own Notifications
+      const [msgUnread, msgRecent, notifUnread, notifRecent] = await Promise.all([
         prisma.adminMessage.count({ where: { status: "unread" } }),
         prisma.adminMessage.findMany({
           where: { status: "unread" },
@@ -28,10 +27,16 @@ export async function GET(req: NextRequest) {
           take: 5,
           include: { user: { select: { name: true, avatar: true } } },
         }),
+        prisma.notification.count({ where: { userId: user.id, read: false } }),
+        prisma.notification.findMany({
+          where: { userId: user.id },
+          orderBy: { createdAt: "desc" },
+          take: 5,
+        }),
       ]);
-      return NextResponse.json({
-        unread,
-        notifications: recent.map((m) => ({
+
+      const notifications = [
+        ...msgRecent.map((m) => ({
           id: m.id,
           type: "message",
           title: `New message from ${m.user.name}`,
@@ -39,19 +44,48 @@ export async function GET(req: NextRequest) {
           time: m.createdAt,
           avatar: m.user.avatar,
           href: "/admin/messages",
+          read: false,
+        })),
+        ...notifRecent.map((n) => ({
+          id: n.id,
+          type: n.type,
+          title: n.title,
+          body: n.body,
+          time: n.createdAt,
+          href: n.href,
+          read: n.read,
+        })),
+      ].sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime()).slice(0, 8);
+
+      return NextResponse.json({ unread: msgUnread + notifUnread, notifications });
+    } else {
+      // Regular users: their Notification records
+      const [unread, notifications] = await Promise.all([
+        prisma.notification.count({ where: { userId: user.id, read: false } }),
+        prisma.notification.findMany({
+          where: { userId: user.id },
+          orderBy: { createdAt: "desc" },
+          take: 8,
+        }),
+      ]);
+      return NextResponse.json({
+        unread,
+        notifications: notifications.map((n) => ({
+          id: n.id,
+          type: n.type,
+          title: n.title,
+          body: n.body,
+          time: n.createdAt,
+          href: n.href,
+          read: n.read,
         })),
       });
-    } else {
-      // Regular users — no incoming messages yet, but show system notifications
-      // (e.g. case status changes — placeholder for now)
-      return NextResponse.json({ unread: 0, notifications: [] });
     }
   } catch {
     return NextResponse.json({ unread: 0, notifications: [] });
   }
 }
 
-// PATCH — mark all as read
 export async function PATCH(req: NextRequest) {
   const user = await getUser(req);
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -62,5 +96,11 @@ export async function PATCH(req: NextRequest) {
       data: { status: "read" },
     });
   }
+  // Mark user's own notifications as read
+  await prisma.notification.updateMany({
+    where: { userId: user.id, read: false },
+    data: { read: true },
+  });
+
   return NextResponse.json({ success: true });
 }

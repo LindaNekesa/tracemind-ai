@@ -2,10 +2,23 @@ import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcrypt";
 import { SignJWT } from "jose";
 import { prisma } from "@/lib/prisma";
+import { checkRateLimit, resetRateLimit } from "@/lib/rateLimit";
 
 const secret = new TextEncoder().encode(process.env.JWT_SECRET || "supersecret");
 
 export async function POST(req: NextRequest) {
+  const ip = req.headers.get("x-forwarded-for") ?? req.headers.get("x-real-ip") ?? "unknown";
+
+  // Rate limit: 5 attempts per 15 minutes per IP
+  const limit = checkRateLimit(`login:${ip}`, 5, 15 * 60 * 1000);
+  if (!limit.allowed) {
+    const mins = Math.ceil(limit.resetIn / 60000);
+    return NextResponse.json(
+      { error: `Too many login attempts. Try again in ${mins} minute${mins > 1 ? "s" : ""}.` },
+      { status: 429 }
+    );
+  }
+
   try {
     const body = await req.json();
     const { email, password } = body;
@@ -18,10 +31,7 @@ export async function POST(req: NextRequest) {
     try {
       user = await prisma.user.findUnique({ where: { email } });
     } catch {
-      return NextResponse.json(
-        { error: "Database unavailable. Please restart the server and run: npx prisma generate" },
-        { status: 503 }
-      );
+      return NextResponse.json({ error: "Database unavailable. Run: npx prisma generate" }, { status: 503 });
     }
 
     if (!user) {
@@ -33,6 +43,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Incorrect password" }, { status: 401 });
     }
 
+    // Successful login — reset rate limit
+    resetRateLimit(`login:${ip}`);
+
+    // Update lastLoginAt (non-blocking — may fail if Prisma client is stale)
+    prisma.user.update({ where: { id: user.id }, data: { lastLoginAt: new Date() } as never }).catch(() => {});
+
     const token = await new SignJWT({
       userId: user.id, email: user.email,
       name: user.name, role: user.role, department: user.department,
@@ -42,12 +58,7 @@ export async function POST(req: NextRequest) {
       .sign(secret);
 
     const res = NextResponse.json({ message: "Login successful", role: user.role });
-    res.cookies.set("auth_token", token, {
-      httpOnly: true,
-      path: "/",
-      maxAge: 8 * 60 * 60,
-    });
-
+    res.cookies.set("auth_token", token, { httpOnly: true, path: "/", maxAge: 8 * 60 * 60 });
     return res;
   } catch {
     return NextResponse.json({ error: "Login failed. Please try again." }, { status: 500 });

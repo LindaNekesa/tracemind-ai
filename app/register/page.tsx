@@ -28,7 +28,10 @@ const DEPARTMENTS = [
   { value: "threat_intelligence", label: "Threat Intelligence" },
   { value: "compliance",          label: "Compliance & Legal" },
   { value: "it_security",         label: "IT Security" },
+  { value: "education",           label: "Education / Training" },
 ];
+
+import PhoneInput from "@/components/PhoneInput";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -143,7 +146,7 @@ export default function RegisterPage() {
 
             <div>
               <label className={labelCls}>Phone <span className="text-gray-600 normal-case font-normal">(optional)</span></label>
-              <input type="tel" placeholder="+1 234 567 8900" value={form.phone} onChange={(e) => set("phone", e.target.value)} className={inputCls} />
+              <PhoneInput value={form.phone} onChange={(v) => set("phone", v)} />
             </div>
 
             <div className="grid grid-cols-2 gap-3">

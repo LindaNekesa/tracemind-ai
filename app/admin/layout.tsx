@@ -5,14 +5,16 @@ import { usePathname } from "next/navigation";
 import Navbar from "@/components/NavBar";
 
 const adminLinks = [
-  { href: "/admin",             label: "Overview",    icon: "📊" },
-  { href: "/admin/assistant",   label: "AI Assistant", icon: "🤖" },
+  { href: "/admin",             label: "Overview",      icon: "📊" },
+  { href: "/admin/assistant",   label: "AI Assistant",  icon: "🤖" },
   { href: "/admin/verify",      label: "Case Verifier", icon: "⚖️" },
-  { href: "/admin/credibility", label: "Credibility", icon: "🔍" },
-  { href: "/admin/users",       label: "Users",       icon: "👥" },
-  { href: "/admin/messages",    label: "Messages",    icon: "✉️" },
-  { href: "/admin/audit",       label: "Audit Log",   icon: "📋" },
-  { href: "/dashboard",         label: "← App",       icon: "🔙" },
+  { href: "/admin/credibility", label: "Credibility",   icon: "🔍" },
+  { href: "/admin/training",    label: "Training",      icon: "🎓" },
+  { href: "/admin/users",       label: "Users",         icon: "👥" },
+  { href: "/admin/messages",    label: "Messages",      icon: "✉️" },
+  { href: "/admin/audit",       label: "Audit Log",     icon: "📋" },
+  { href: "/admin/health",      label: "System Health", icon: "💚" },
+  { href: "/dashboard",         label: "← App",         icon: "🔙" },
 ];
 
 function AdminSidebar() {

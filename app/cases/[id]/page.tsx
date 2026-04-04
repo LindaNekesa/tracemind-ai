@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import AiAnalysis from "@/components/AiAnalysis";
+import CaseComments from "@/components/CaseComments";
 import toast from "react-hot-toast";
 
 interface Evidence { id: string; filePath: string; fileType: string; createdAt: string; }
@@ -32,18 +33,25 @@ export default function CaseDetail() {
   const { id }   = useParams<{ id: string }>();
   const router   = useRouter();
   const [caseData, setCaseData] = useState<Case | null>(null);
+  const [evidenceList, setEvidenceList] = useState<Evidence[]>([]);
   const [loading, setLoading]   = useState(true);
   const [editing, setEditing]   = useState(false);
   const [editForm, setEditForm] = useState({ status: "", priority: "" });
   const [saving, setSaving]     = useState(false);
-  const [activeTab, setActiveTab] = useState<"overview" | "evidence" | "analysis">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "evidence" | "analysis" | "comments">("overview");
 
   useEffect(() => {
     fetch(`/api/cases/${id}`)
       .then((r) => r.json())
-      .then((d) => { setCaseData(d); setEditForm({ status: d.status, priority: d.priority }); })
+      .then((d) => { setCaseData(d); setEvidenceList(d.evidence ?? []); setEditForm({ status: d.status, priority: d.priority }); })
       .finally(() => setLoading(false));
   }, [id]);
+
+  const deleteEvidence = async (evidenceId: string) => {
+    if (!confirm("Delete this evidence file?")) return;
+    await fetch(`/api/evidence/${evidenceId}`, { method: "DELETE" });
+    setEvidenceList((p) => p.filter((e) => e.id !== evidenceId));
+  };
 
   const saveEdit = async () => {
     setSaving(true);
@@ -136,7 +144,7 @@ export default function CaseDetail() {
 
       {/* Tabs */}
       <div className="flex gap-1 bg-gray-100 dark:bg-white/5 p-1 rounded-xl w-fit">
-        {(["overview", "evidence", "analysis"] as const).map((tab) => (
+        {(["overview", "evidence", "analysis", "comments"] as const).map((tab) => (
           <button key={tab} onClick={() => setActiveTab(tab)}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition capitalize ${activeTab === tab ? "bg-white dark:bg-white/10 text-gray-900 dark:text-white shadow-sm" : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"}`}>
             {tab}
@@ -171,14 +179,14 @@ export default function CaseDetail() {
               + Upload Evidence
             </Link>
           </div>
-          {!caseData.evidence?.length ? (
+          {!evidenceList?.length ? (
             <div className="bg-white dark:bg-white/3 border border-gray-100 dark:border-white/5 rounded-2xl p-12 text-center">
               <p className="text-3xl mb-3">🗂️</p>
               <p className="text-gray-500 dark:text-gray-400 text-sm">No evidence uploaded yet.</p>
             </div>
           ) : (
             <div className="grid gap-3">
-              {caseData.evidence.map((e) => (
+              {evidenceList.map((e) => (
                 <div key={e.id} className="bg-white dark:bg-white/3 border border-gray-100 dark:border-white/5 rounded-xl p-4 flex items-center gap-3">
                   <div className="w-10 h-10 rounded-lg bg-blue-50 dark:bg-blue-500/10 flex items-center justify-center text-lg shrink-0">
                     {e.fileType.startsWith("image") ? "🖼️" : e.fileType.includes("pdf") ? "📄" : "📎"}
@@ -187,6 +195,10 @@ export default function CaseDetail() {
                     <p className="text-sm font-medium text-gray-800 dark:text-white truncate">{e.filePath.split("/").pop()}</p>
                     <p className="text-xs text-gray-400">{e.fileType} · {new Date(e.createdAt).toLocaleDateString()}</p>
                   </div>
+                  <button onClick={() => deleteEvidence(e.id)}
+                    className="text-xs text-red-500 hover:text-red-700 transition font-medium shrink-0">
+                    Delete
+                  </button>
                 </div>
               ))}
             </div>
@@ -196,6 +208,10 @@ export default function CaseDetail() {
 
       {activeTab === "analysis" && (
         <AiAnalysis caseId={caseData.id} logs={caseData.logs ?? []} />
+      )}
+
+      {activeTab === "comments" && (
+        <CaseComments caseId={caseData.id} />
       )}
     </div>
   );

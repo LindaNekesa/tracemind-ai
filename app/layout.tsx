@@ -3,14 +3,21 @@ import { ReactNode } from "react";
 import { Toaster } from "react-hot-toast";
 
 export const metadata = {
-  title: "TraceMind AI",
-  description: "Digital Forensics Investigation Assistant",
+  title: "TraceMind AI — Digital Forensics Platform",
+  description: "AI-powered digital forensics investigation platform. Manage evidence, detect threats, verify cases for court.",
+  icons: {
+    icon: [
+      { url: "/favicon.svg", type: "image/svg+xml" },
+    ],
+    shortcut: "/favicon.svg",
+  },
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
         {/* Apply dark mode before paint to prevent flash */}
         <script
           dangerouslySetInnerHTML={{

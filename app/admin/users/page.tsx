@@ -23,6 +23,7 @@ const DEPARTMENTS = [
   { value: "threat_intelligence", label: "Threat Intelligence" },
   { value: "compliance",          label: "Compliance & Legal" },
   { value: "it_security",         label: "IT Security" },
+  { value: "education",           label: "Education / Training" },
 ];
 const roleColor: Record<string, string> = {
   admin: "bg-red-100 text-red-700", supervisor: "bg-orange-100 text-orange-700",

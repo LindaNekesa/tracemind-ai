@@ -29,9 +29,9 @@ export default function Dashboard() {
 
   // Fetch cases from API
   useEffect(() => {
-    fetch("/api/cases")
+    fetch("/api/cases?limit=100")
       .then((res) => res.json())
-      .then(setCases);
+      .then((d) => setCases(Array.isArray(d) ? d : (d.cases ?? [])));
   }, []);
 
   // Analyze case

@@ -81,6 +81,20 @@ export default async function AdminPage() {
         <StatsCard title="AI Analyses"    value={s.totalAnalyses} icon="🤖" color="red"    sub="Completed" />
       </div>
 
+      {/* Training quick stat */}
+      <div className="bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 rounded-2xl p-4 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <span className="text-2xl">🎓</span>
+          <div>
+            <p className="font-semibold text-amber-800 dark:text-amber-300 text-sm">Training Program</p>
+            <p className="text-xs text-amber-600 dark:text-amber-400">Monitor student enrollment and learning progress</p>
+          </div>
+        </div>
+        <Link href="/admin/training" className="bg-amber-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-amber-700 transition shrink-0">
+          View Training →
+        </Link>
+      </div>
+
       {/* Case status */}
       <div className="grid grid-cols-3 gap-4">
         {[

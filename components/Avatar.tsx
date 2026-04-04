@@ -24,7 +24,7 @@ export default function Avatar({ src, name, size = "md", editable = false, onUpd
   const [showMenu, setShowMenu] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const initials = name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2);
+  const initials = name ? name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2) : "?";
 
   const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
