@@ -3,12 +3,12 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "node node_modules/next/dist/bin/next dev",
-    "dev:next": "node node_modules/next/dist/bin/next dev",
+    "dev": "node_modules/.bin/next.cmd dev",
+    "dev:next": "node_modules/.bin/next.cmd dev",
     "dev:ai": "powershell -NoProfile -Command \"Set-Location ai-engine; python -m uvicorn main:app --reload --port 8000\"",
-    "build": "prisma generate && node node_modules/next/dist/bin/next build",
-    "postinstall": "prisma generate",
-    "start": "node node_modules/next/dist/bin/next start",
+    "build": "node_modules/.bin/next.cmd build",
+    "postinstall": "node node_modules/prisma/build/index.js generate",
+    "start": "node_modules/.bin/next.cmd start",
     "lint": "eslint"
   },
   "dependencies": {
