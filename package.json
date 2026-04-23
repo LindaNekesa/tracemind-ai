@@ -3,13 +3,15 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "node_modules/.bin/next.cmd dev",
-    "dev:next": "node_modules/.bin/next.cmd dev",
-    "dev:ai": "powershell -NoProfile -Command \"Set-Location ai-engine; python -m uvicorn main:app --reload --port 8000\"",
-    "build": "node_modules/.bin/next.cmd build",
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
     "postinstall": "node node_modules/prisma/build/index.js generate",
-    "start": "node_modules/.bin/next.cmd start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"
+  },
+  "prisma": {
+    "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"
   },
   "dependencies": {
     "@prisma/client": "^4.16.2",
@@ -22,7 +24,7 @@
     "jose": "^6.2.2",
     "jsonwebtoken": "^9.0.3",
     "multer": "^2.1.1",
-    "next": "^16.2.1",
+    "next": "^16.2.4",
     "nodemailer": "^8.0.4",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
@@ -46,6 +48,7 @@
     "postcss": "^8.5.8",
     "prisma": "^4.16.2",
     "tailwindcss": "^4.2.2",
+    "ts-node": "^10.9.2",
     "typescript": "^5.9.3"
   }
 }

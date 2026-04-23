@@ -1,18 +1,9 @@
 import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
-import { jwtVerify } from "jose";
-
-const secret = new TextEncoder().encode(process.env.JWT_SECRET || "supersecret");
-
-async function getUserId(req: NextRequest): Promise<string | null> {
-  try {
-    const token = req.cookies.get("auth_token")?.value ?? "";
-    const { payload } = await jwtVerify(token, secret);
-    return payload.userId as string;
-  } catch { return null; }
-}
+import { requireRole } from "@/lib/rbac";
 
 export async function GET(req: NextRequest) {
+  // All authenticated roles can view cases — middleware already enforces auth
   try {
     const { searchParams } = new URL(req.url);
     const search   = searchParams.get("q") ?? "";
@@ -45,8 +36,9 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  const userId = await getUserId(req);
-  if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const auth = await requireRole(req, ["admin","supervisor","investigator","analyst","security_analyst","forensic_examiner","threat_hunter","incident_responder","fraud_analyst"]);
+  if (auth.error) return auth.error;
+  const userId = auth.userId;
 
   try {
     const body = await req.json();

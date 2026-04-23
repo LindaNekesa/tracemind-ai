@@ -30,8 +30,9 @@ export async function POST(req: NextRequest) {
     let user;
     try {
       user = await prisma.user.findUnique({ where: { email } });
-    } catch {
-      return NextResponse.json({ error: "Database unavailable. Run: npx prisma generate" }, { status: 503 });
+    } catch (dbError) {
+      console.error("[login] Database error:", dbError);
+      return NextResponse.json({ error: "Service temporarily unavailable. Please try again later." }, { status: 503 });
     }
 
     if (!user) {

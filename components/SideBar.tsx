@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import ContactAdmin from "./ContactAdmin";
 import Avatar from "./Avatar";
+import { hasPermission, type Permission } from "@/lib/rbac";
 
 interface Me { name: string; role: string; email: string; avatar?: string | null; }
 
@@ -15,29 +16,37 @@ const roleLabel: Record<string, string> = {
   trainee: "Trainee", viewer: "Viewer",
 };
 
+interface NavLink { href: string; label: string; icon: string; permission?: Permission; }
+
+const NAV_LINKS: NavLink[] = [
+  { href: "/dashboard",       label: "Dashboard", icon: "▣" },
+  { href: "/cases",           label: "Cases",      icon: "⬡",  permission: "cases_view" },
+  { href: "/evidence/upload", label: "Evidence",   icon: "◈",  permission: "evidence_upload" },
+  { href: "/reports",         label: "Reports",    icon: "◧",  permission: "reports_view" },
+  { href: "/learn",           label: "Learning",   icon: "🎓", permission: "learn" },
+];
+
 export default function Sidebar() {
   const pathname = usePathname();
-  const [isAdmin, setIsAdmin]     = useState(false);
   const [showContact, setShowContact] = useState(false);
-  const [me, setMe]               = useState<Me | null>(null);
-
-  const links = [
-    { href: "/dashboard",       label: "Dashboard", icon: "▣" },
-    { href: "/cases",           label: "Cases",      icon: "⬡" },
-    { href: "/evidence/upload", label: "Evidence",   icon: "◈" },
-    { href: "/reports",         label: "Reports",    icon: "◧" },
-    ...(me?.role === "trainee" ? [{ href: "/learn", label: "Learning", icon: "🎓" }] : []),
-  ];
+  const [me, setMe] = useState<Me | null>(null);
 
   useEffect(() => {
     fetch("/api/auth/me")
       .then((r) => r.json())
-      .then((d) => { setIsAdmin(d.role === "admin"); setMe(d); })
+      .then((d) => setMe(d))
       .catch(() => {});
   }, []);
 
   const isActive = (href: string) =>
     href === "/dashboard" ? pathname === href : pathname.startsWith(href);
+
+  // Filter nav links based on role permissions
+  const visibleLinks = me
+    ? NAV_LINKS.filter((l) => !l.permission || hasPermission(me.role, l.permission))
+    : [];
+
+  const isAdmin = me?.role === "admin";
 
   return (
     <>
@@ -71,7 +80,8 @@ export default function Sidebar() {
         {/* Nav */}
         <nav className="flex-1 px-3 py-4 space-y-0.5">
           <p className="text-xs font-semibold text-gray-600 uppercase tracking-widest px-3 mb-3">Navigation</p>
-          {links.map((l) => (            <Link key={l.label} href={l.href}
+          {visibleLinks.map((l) => (
+            <Link key={l.label} href={l.href}
               className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition text-sm font-medium ${
                 isActive(l.href)
                   ? "bg-blue-600/15 text-blue-400 border border-blue-500/20"

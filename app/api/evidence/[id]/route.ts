@@ -9,7 +9,7 @@ export async function DELETE(_req: Request, { params }: { params: { id: string }
     if (!evidence) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
     // Delete file from disk
-    const filePath = path.join(process.cwd(), evidence.filePath);
+    const filePath = path.join(/*turbopackIgnore: true*/ process.cwd(), evidence.filePath);
     if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
 
     await prisma.evidence.delete({ where: { id: params.id } });

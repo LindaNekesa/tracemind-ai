@@ -1,7 +1,11 @@
 import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
+import { requireRole } from "@/lib/rbac";
 
 export async function GET(req: NextRequest) {
+  const auth = await requireRole(req, ["admin","supervisor","auditor","legal_counsel","analyst","investigator","security_analyst","forensic_examiner","threat_hunter","incident_responder","fraud_analyst"]);
+  if (auth.error) return auth.error;
+
   const format = new URL(req.url).searchParams.get("format") ?? "csv";
 
   const cases = await prisma.case.findMany({
