@@ -19,7 +19,7 @@ export default function ChartComponent({ data = fallback, type = "line", title }
   return (
     <div className="bg-white p-5 rounded-xl shadow-sm">
       {title && <h3 className="font-semibold text-gray-700 mb-4">{title}</h3>}
-      <div className="h-56">
+      <div style={{ width: "100%", height: 300 }}>
         <ResponsiveContainer width="100%" height="100%">
           {type === "bar" ? (
             <BarChart data={data}>
